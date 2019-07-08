@@ -165,6 +165,7 @@ contract EventTickets {
     isOwner
     payable
     returns(bool){
+       require(myEvent.isOpen == true);
        myEvent.isOpen = false;
        uint amountToTransfer = myEvent.sales * TICKET_PRICE;
        owner.transfer(amountToTransfer);

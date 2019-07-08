@@ -190,8 +190,8 @@ contract EventTicketsV2 {
     payable
     isOwner
     returns(bool){
-        require(myEvent.isOpen == true);
         Event memory myEvent = events[eventId];
+        require(myEvent.isOpen == true);
         myEvent.isOpen = false;
         uint amountToTransfer = myEvent.sales * PRICE_TICKET;
         owner.transfer(amountToTransfer);
