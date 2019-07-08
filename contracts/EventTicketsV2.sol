@@ -122,7 +122,7 @@ contract EventTicketsV2 {
     public 
     payable
     returns(bool){
-        Event memory myEvent = events[eventId];
+        Event storage myEvent = events[eventId];
         require(myEvent.isOpen == true,"Event not open");
         require(msg.value>= PRICE_TICKET,"Value less than ticker price");
         require(numberOfTickets>0,"should buy atleast a ticket");
@@ -131,7 +131,7 @@ contract EventTicketsV2 {
         uint amountToRefund = (numberOfTickets*PRICE_TICKET) - msg.value;
         msg.sender.transfer(amountToRefund);
         myEvent.sales = myEvent.sales + numberOfTickets;
-        emit LogBuyTickets(msg.sender, numberOfTickets);
+        emit LogBuyTickets(msg.sender, numberOfTickets, eventId);
         return true;
     }
 
@@ -150,13 +150,13 @@ contract EventTicketsV2 {
     public
     payable
     returns(bool){
-        Event memory myEvent = events[eventId];
+        Event storage myEvent = events[eventId];
         uint numberOfTickets = myEvent.buyers[msg.sender];
         require(numberOfTickets>0);
         uint amountToRefund = numberOfTickets*PRICE_TICKET;
         msg.sender.transfer(amountToRefund);
         myEvent.sales = myEvent.sales - numberOfTickets;
-        emit LogGetRefund(msg.sender, numberOfTickets);
+        emit LogGetRefund(msg.sender, numberOfTickets, eventId);
         return true;
     }
 
@@ -170,7 +170,7 @@ contract EventTicketsV2 {
     public
     view
     returns(uint){
-        Event memory myEvent = events[eventId];
+        Event storage myEvent = events[eventId];
         uint numberOfTickets = myEvent.buyers[msg.sender];
         return numberOfTickets;
     }
