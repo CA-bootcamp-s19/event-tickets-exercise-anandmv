@@ -19,7 +19,6 @@ contract EventTicketsV2 {
     /*
         Create a variable to keep track of the event ID numbers.
     */
-    mapping (uint => uint) eventId;
     uint public idGenerator;
 
     /*
@@ -44,7 +43,7 @@ contract EventTicketsV2 {
         Call the mapping "events".
     */
 
-    mapping(unit => Event) events;
+    mapping(uint => Event) events;
 
     event LogEventAdded(string desc, string url, uint ticketsAvailable, uint eventId);
     event LogBuyTickets(address buyer, uint eventId, uint numTickets);
@@ -76,7 +75,7 @@ contract EventTicketsV2 {
     public 
     returns(uint){
         idGenerator++;
-        Event myEvent;
+        Event memory myEvent;
         myEvent.description = _description;
         myEvent.website = _website;
         myEvent.totalTickets = _totalTickets;
@@ -100,7 +99,7 @@ contract EventTicketsV2 {
         view
         returns(string memory description, string memory website, uint totalTickets, uint sales, bool isOpen)
     {
-        Event myEvent = events[_eventId]
+        Event memory myEvent = events[_eventId];
         return (myEvent.description, myEvent.website, myEvent.totalTickets, myEvent.sales, myEvent.isOpen);
     }
 
@@ -123,13 +122,13 @@ contract EventTicketsV2 {
     public 
     payable
     returns(bool){
-        Event myEvent = events[eventId];
+        Event memory myEvent = events[eventId];
         require(myEvent.isOpen == true,"Event not open");
-        require(msg.value>= TICKET_PRICE,"Value less than ticker price");
+        require(msg.value>= PRICE_TICKET,"Value less than ticker price");
         require(numberOfTickets>0,"should buy atleast a ticket");
         require((myEvent.totalTickets - myEvent.sales) > numberOfTickets, "not that much ticket left");
         myEvent.buyers[msg.sender] =  myEvent.buyers[msg.sender] + numberOfTickets;
-        uint amountToRefund = (numberOfTickets*TICKET_PRICE) - msg.value;
+        uint amountToRefund = (numberOfTickets*PRICE_TICKET) - msg.value;
         msg.sender.transfer(amountToRefund);
         myEvent.sales = myEvent.sales + numberOfTickets;
         emit LogBuyTickets(msg.sender, numberOfTickets);
@@ -151,10 +150,10 @@ contract EventTicketsV2 {
     public
     payable
     returns(bool){
-        Event myEvent = events[eventId];
+        Event memory myEvent = events[eventId];
         uint numberOfTickets = myEvent.buyers[msg.sender];
         require(numberOfTickets>0);
-        uint amountToRefund = numberOfTickets*TICKET_PRICE;
+        uint amountToRefund = numberOfTickets*PRICE_TICKET;
         msg.sender.transfer(amountToRefund);
         myEvent.sales = myEvent.sales - numberOfTickets;
         emit LogGetRefund(msg.sender, numberOfTickets);
@@ -171,8 +170,8 @@ contract EventTicketsV2 {
     public
     view
     returns(uint){
-        Event myEvent = events[eventId];
-        uint numberOfTickets = myEvent.buyers[buyerAddress];
+        Event memory myEvent = events[eventId];
+        uint numberOfTickets = myEvent.buyers[msg.sender];
         return numberOfTickets;
     }
 
@@ -189,9 +188,9 @@ contract EventTicketsV2 {
     public
     isOwner
     returns(bool){
-        Event myEvent = events[eventId];
+        Event memory myEvent = events[eventId];
        myEvent.isOpen = false;
-       uint amountToTransfer = myEvent.sales * TICKET_PRICE;
+       uint amountToTransfer = myEvent.sales * PRICE_TICKET;
        owner.transfer(amountToTransfer);
        return true;
     }
