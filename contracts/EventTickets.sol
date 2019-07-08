@@ -165,6 +165,8 @@ contract EventTickets {
     isOwner
     returns(bool){
        myEvent.isOpen = false;
+       uint amountToTransfer = myEvent.sales * TICKET_PRICE;
+       owner.transfer(amountToTransfer);
        return true;
     }
 }

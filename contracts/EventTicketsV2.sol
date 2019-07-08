@@ -8,11 +8,18 @@ contract EventTicketsV2 {
     /*
         Define an public owner variable. Set it to the creator of the contract when it is initialized.
     */
+    address payable public owner;
+
+    constructor() public{
+        owner = msg.sender;
+    }
+
     uint   PRICE_TICKET = 100 wei;
 
     /*
         Create a variable to keep track of the event ID numbers.
     */
+    mapping (unit => unit) eventId;
     uint public idGenerator;
 
     /*
