@@ -163,6 +163,7 @@ contract EventTickets {
     function endSale()
     public
     isOwner
+    payable
     returns(bool){
        myEvent.isOpen = false;
        uint amountToTransfer = myEvent.sales * TICKET_PRICE;

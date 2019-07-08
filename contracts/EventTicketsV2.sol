@@ -187,12 +187,14 @@ contract EventTicketsV2 {
     */
     function endSale(uint eventId)
     public
+    payable
     isOwner
     returns(bool){
+        retuire(myEvent.isOpen == true);
         Event memory myEvent = events[eventId];
-       myEvent.isOpen = false;
-       uint amountToTransfer = myEvent.sales * PRICE_TICKET;
-       owner.transfer(amountToTransfer);
-       return true;
+        myEvent.isOpen = false;
+        uint amountToTransfer = myEvent.sales * PRICE_TICKET;
+        owner.transfer(amountToTransfer);
+        return true;
     }
 }
