@@ -73,6 +73,7 @@ contract EventTicketsV2 {
     */
     function addEvent(string memory _description, string memory _website, uint _totalTickets) 
     public 
+    isOwner
     returns(uint){
         idGenerator++;
         Event memory myEvent;
