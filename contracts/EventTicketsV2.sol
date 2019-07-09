@@ -61,7 +61,7 @@ contract EventTicketsV2 {
 
     modifier refundAmount(uint _numberOfTickets){
         _;
-        uint amountToRefund =  msg.value - (_numberOfTickets * TICKET_PRICE);
+        uint amountToRefund =  msg.value - (_numberOfTickets * PRICE_TICKET);
         if(amountToRefund > 0){
             msg.sender.transfer(amountToRefund);
         }
@@ -83,7 +83,6 @@ contract EventTicketsV2 {
     public 
     isOwner
     returns(uint){
-        idGenerator++;
         Event memory myEvent;
         myEvent.description = _description;
         myEvent.website = _website;
@@ -91,7 +90,8 @@ contract EventTicketsV2 {
         myEvent.isOpen = true;
         events[idGenerator] = myEvent;
         emit LogEventAdded(_description, _website, _totalTickets, idGenerator);
-        return idGenerator;
+        idGenerator++;
+        return idGenerator-1;
     }
     /*
         Define a function called readEvent().
@@ -108,8 +108,7 @@ contract EventTicketsV2 {
         view
         returns(string memory description, string memory website, uint totalTickets, uint sales, bool isOpen)
     {
-        Event memory myEvent = events[_eventId];
-        return (myEvent.description, myEvent.website, myEvent.totalTickets, myEvent.sales, myEvent.isOpen);
+        return (events[_eventId].description, events[_eventId].website, events[_eventId].totalTickets, events[_eventId].sales, events[_eventId].isOpen);
     }
 
     /*
@@ -142,7 +141,7 @@ contract EventTicketsV2 {
 
         myEvent.buyers[msg.sender] =  myEvent.buyers[msg.sender] + numberOfTickets;
         myEvent.sales = myEvent.sales + numberOfTickets;
-        emit LogBuyTickets(msg.sender, numberOfTickets, eventId);
+        emit LogBuyTickets(msg.sender, eventId, numberOfTickets);
         return true;
     }
 
@@ -177,12 +176,11 @@ contract EventTicketsV2 {
         This function returns a uint, the number of tickets that the msg.sender has purchased.
     */
 
-    function getBuyerTicketCount(uint eventId) 
+    function getBuyerNumberTickets(uint eventId) 
     public
     view
     returns(uint){
-        Event storage myEvent = events[eventId];
-        uint numberOfTickets = myEvent.buyers[msg.sender];
+        uint numberOfTickets = events[eventId].buyers[msg.sender];
         return numberOfTickets;
     }
 
@@ -200,11 +198,11 @@ contract EventTicketsV2 {
     payable
     isOwner
     returns(bool){
-        Event memory myEvent = events[eventId];
-        require(myEvent.isOpen == true);
-        myEvent.isOpen = false;
-        uint amountToTransfer = myEvent.sales * PRICE_TICKET;
+        require(events[eventId].isOpen == true);
+        events[eventId].isOpen = false;
+        uint amountToTransfer = events[eventId].sales * PRICE_TICKET;
         owner.transfer(amountToTransfer);
+        emit LogEndSale(owner, amountToTransfer, eventId);
         return true;
     }
 }
