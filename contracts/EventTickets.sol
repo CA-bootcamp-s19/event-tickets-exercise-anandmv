@@ -53,6 +53,14 @@ contract EventTickets {
         _;
     }
 
+    modifier refundAmount(uint _numberOfTickets){
+        _;
+        uint amountToRefund =  msg.value - (_numberOfTickets * TICKET_PRICE);
+        if(amountToRefund > 0){
+            msg.sender.transfer(amountToRefund);
+        }
+    }
+
     /*
         Define a constructor.
         The constructor takes 3 arguments, the description, the URL and the number of tickets for sale.
@@ -114,14 +122,16 @@ contract EventTickets {
     function buyTickets(uint numberOfTickets)
     public 
     payable
+    refundAmount(numberOfTickets)
     returns(bool){
         require(myEvent.isOpen == true,"Event not open");
-        require(msg.value>= TICKET_PRICE,"Value less than ticker price");
         require(numberOfTickets>0,"should buy atleast a ticket");
         require((myEvent.totalTickets - myEvent.sales) > numberOfTickets, "not that much ticket left");
+        
+        uint totalAmount = numberOfTickets * TICKET_PRICE;
+        require(msg.value>= totalAmount,"Value less than ticker price");
+
         myEvent.buyers[msg.sender] =  myEvent.buyers[msg.sender] + numberOfTickets;
-        uint amountToRefund = (numberOfTickets*TICKET_PRICE) - msg.value;
-        msg.sender.transfer(amountToRefund);
         myEvent.sales = myEvent.sales + numberOfTickets;
         emit LogBuyTickets(msg.sender, numberOfTickets);
         return true;

@@ -59,6 +59,14 @@ contract EventTicketsV2 {
         _;
     }
 
+    modifier refundAmount(uint _numberOfTickets){
+        _;
+        uint amountToRefund =  msg.value - (_numberOfTickets * TICKET_PRICE);
+        if(amountToRefund > 0){
+            msg.sender.transfer(amountToRefund);
+        }
+    }
+
     /*
         Define a function called addEvent().
         This function takes 3 parameters, an event description, a URL, and a number of tickets.
@@ -122,15 +130,17 @@ contract EventTicketsV2 {
     function buyTickets(uint eventId, uint numberOfTickets)
     public 
     payable
+    refundAmount(numberOfTickets)
     returns(bool){
         Event storage myEvent = events[eventId];
         require(myEvent.isOpen == true,"Event not open");
-        require(msg.value>= PRICE_TICKET,"Value less than ticker price");
         require(numberOfTickets>0,"should buy atleast a ticket");
         require((myEvent.totalTickets - myEvent.sales) > numberOfTickets, "not that much ticket left");
+
+        uint totalAmount = numberOfTickets * PRICE_TICKET;
+        require(msg.value>= totalAmount,"Value less than ticker price");
+
         myEvent.buyers[msg.sender] =  myEvent.buyers[msg.sender] + numberOfTickets;
-        uint amountToRefund = (numberOfTickets*PRICE_TICKET) - msg.value;
-        msg.sender.transfer(amountToRefund);
         myEvent.sales = myEvent.sales + numberOfTickets;
         emit LogBuyTickets(msg.sender, numberOfTickets, eventId);
         return true;
